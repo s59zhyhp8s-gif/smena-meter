@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SMENA METER 2.0</title>
+<style>
+:root{--bg:#171916;--panel:#242824;--cream:#e9dfc7;--red:#c54435;--gold:#b9a16a;--muted:#9c9e91}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#343a32,#151714 65%);color:var(--cream);font:15px system-ui,-apple-system,sans-serif}
+main{max-width:520px;margin:auto;padding:15px}.top{display:flex;justify-content:space-between;align-items:center;margin:8px 2px 16px}.brand{font-weight:900;letter-spacing:3px;font-size:22px}.sub{font-size:10px;letter-spacing:2px;color:var(--gold)}
+.card{background:linear-gradient(145deg,#2b302b,#202420);border:1px solid #4a5046;border-radius:18px;padding:15px;box-shadow:0 12px 28px #0005;margin-bottom:13px}
+.live{height:205px;background:#111;border-radius:12px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;border:1px solid #50534a}
+video{width:100%;height:100%;object-fit:cover;display:none}.live .placeholder{color:#85897d;text-align:center;padding:20px}.live .corner{position:absolute;top:10px;left:12px;font-size:11px;color:#e4d8b9;background:#1119;padding:5px 8px;border-radius:5px}
+.btn{border:1px solid #777b6b;border-radius:9px;padding:10px 12px;background:#343a32;color:var(--cream);font-weight:700;cursor:pointer}.btn.red{background:var(--red);border-color:var(--red)}.btnrow{display:flex;gap:8px;margin-top:10px}.btnrow button{flex:1}
+.meter{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.read{background:#171b17;border:1px solid #4c5346;border-radius:12px;text-align:center;padding:14px}.label{font-size:10px;letter-spacing:1.5px;color:var(--gold);font-weight:800}.big{font-size:32px;font-weight:900;letter-spacing:-1px;margin:4px 0}.small{font-size:12px;color:var(--muted)}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}.control{background:#191d19;border-radius:12px;padding:12px;border:1px solid #41473d}.control label{display:block;font-size:11px;color:var(--gold);letter-spacing:1px;margin-bottom:8px;font-weight:800}.control select,.control input{width:100%;background:#30362f;color:var(--cream);border:1px solid #5a6152;border-radius:8px;padding:10px;font:inherit}
+.full{grid-column:1/-1}.range{width:100%;accent:var(--red)}.evrow{display:flex;justify-content:space-between;font-weight:800}
+.foot{font-size:11px;line-height:1.5;color:#aeb1a4;margin:10px 3px}
+</style></head><body><main>
+<div class="top"><div><div class="brand">SMENA METER</div><div class="sub">8M · FIELD EXPOSURE TOOL</div></div><span style="color:var(--red);font-weight:900">● LIVE</span></div>
+<div class="card">
+<div class="live"><video id="video" autoplay playsinline></video><div class="placeholder" id="ph">LIVE VIEW<br><br>Attiva la fotocamera per inquadrare la scena</div><div class="corner" id="status">CAMERA OFF</div></div>
+<div class="btnrow"><button class="btn red" id="cam">Attiva fotocamera</button><button class="btn" id="stop">Stop</button></div>
+<div class="meter"><div class="read"><div class="label">TEMPO SMENA</div><div class="big" id="outT">1/125</div><div class="small">selezione consigliata</div></div><div class="read"><div class="label">DIAFRAMMA</div><div class="big" id="outA">f/8</div><div class="small" id="outG">GOST 64 indicativo</div></div></div></div>
+<div class="card"><div class="controls">
+<div class="control"><label>PELLICOLA / ISO</label><input id="iso" type="number" min="1" max="12800" value="400"></div>
+<div class="control"><label>NOME PELLICOLA</label><input id="film" value="Fomapan 400"></div>
+<div class="control"><label>PRIORITÀ</label><select id="priority"><option value="auto">Combinazione ottimale</option><option value="time">Tempo fisso</option><option value="ap">Diaframma fisso</option></select></div>
+<div class="control"><label>VALORE FISSO</label><select id="fixed"></select></div>
+<div class="control full"><label>COMPENSAZIONE EV <span id="biasval">0</span></label><input class="range" id="bias" type="range" min="-3" max="3" step=".5" value="0"></div>
+<div class="control full"><div class="evrow"><span>LUCE / EV ISO 100</span><span id="evval">13.0</span></div><input class="range" id="ev" type="range" min="4" max="18" step=".1" value="13"><div class="small">Slider manuale di luce (in attesa di calibrazione esposimetrica live)</div></div>
+</div></div>
+<div class="card"><div class="label">RIFERIMENTI SMENA 8M</div><p class="small">Tempi: B · 1/15 · 1/30 · 1/60 · 1/125 · 1/250 s<br>Diaframmi: f/4 · f/5,6 · f/8 · f/11 · f/16<br>ISO selezionabile: 1–12.800 · GOST mostrato come riferimento</p><button class="btn" id="sun" style="width:100%">☀ Sunny 16 · sole pieno</button></div>
+<div class="foot">Prototipo UI. Il live view mostra l'immagine, ma non misura ancora la luminanza in modo calibrato: EV è impostato manualmente. Una vera lettura richiede accesso ai dati della camera e calibrazione.</div>
+</main>
+<script>
+const T=[15,30,60,125,250],A=[4,5.6,8,11,16],$=x=>document.getElementById(x);
+function tstr(t){return '1/'+t}
+function fill(){let s=$('fixed');s.innerHTML='';let v=$('priority').value==='ap'?A.map(x=>'f/'+x):T.map(tstr);v.forEach((x,i)=>{let o=document.createElement('option');o.value=i;o.text=x;s.add(o)})}
+$('priority').onchange=fill;fill();
+function calc(){let iso=Math.max(1,+$('iso').value||400),ev=+$('ev').value,b=+$('bias').value;let target=ev+Math.log2(iso/100)-b,arr=[];
+A.forEach(N=>T.forEach(t=>arr.push({N,t,d:Math.abs(Math.log2(N*N*t)-target)})));
+let c;if($('priority').value==='time'){let t=T[+$('fixed').value||0];c=arr.filter(x=>x.t===t).sort((a,b)=>a.d-b.d)[0]}else if($('priority').value==='ap'){let n=A[+$('fixed').value||0];c=arr.filter(x=>x.N===n).sort((a,b)=>a.d-b.d)[0]}else c=arr.sort((a,b)=>a.d-b.d)[0];
+$('outT').textContent=tstr(c.t);$('outA').textContent='f/'+c.N;$('outG').textContent='GOST '+({16:250,11:125,8:64,5.6:32,4:16}[c.N]||'—')+' indicativo';
+$('evval').textContent=ev.toFixed(1);$('biasval').textContent=(b>0?'+':'')+b}
+['iso','ev','bias','priority','fixed'].forEach(id=>$(id).addEventListener('input',calc));$('sun').onclick=()=>{$('ev').value=15;calc()};
+let stream=null;$('cam').onclick=async()=>{try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});$('video').srcObject=stream;$('video').style.display='block';$('ph').style.display='none';$('status').textContent='LIVE VIEW'}catch(e){$('status').textContent='CAMERA NON DISPONIBILE · HTTPS'}};
+$('stop').onclick=()=>{if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;$('video').style.display='none';$('ph').style.display='block';$('status').textContent='CAMERA OFF'};
+calc();
+</script></body></html>

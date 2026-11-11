@@ -1,0 +1,14 @@
+{
+  "name": "SMENA METER",
+  "short_name": "SMENA",
+  "description": "Esposimetro per Smena 8M",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#11100e",
+  "theme_color": "#8b1e16",
+  "icons": [
+    {"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}
+  ]
+}
